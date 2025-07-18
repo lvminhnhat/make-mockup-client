@@ -1,0 +1,16 @@
+{
+    "app": {
+        "client_name": "dev-pc",
+        "debug": false,
+        "mockup_folder": "D:\\BulkDesign\\Bulk PSD Mockup",
+        "server_url": "http://localhost:8000",
+        "output_folder": "D:\\dev\\sple\\make-mockup-client\\statics\\output",
+        "project_path": "D:\\dev\\sple\\make-mockup-client"
+    },
+    
+    "settings": {
+        "auto_save": true,
+        "backup_enabled": true,
+        "max_file_size": "10MB"
+    }
+}
