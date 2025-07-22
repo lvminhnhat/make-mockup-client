@@ -12,12 +12,19 @@ from image_procesing import process_task
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Add file handler for error logs
+error_handler = logging.FileHandler('error.log')
+error_handler.setLevel(logging.ERROR)
+error_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+error_handler.setFormatter(error_formatter)
+logger.addHandler(error_handler)
+
 config_loader = ConfigLoader()
 
 def get_task():
     server_url = config_loader.get_config_value("app.server_url", "http://localhost:8000")
     client_name = config_loader.get_config_value('app.client_name', 'default_client_name')
-    task_json_url = f"{server_url}/get_task/{client_name}"
+    task_json_url = f"{server_url}/{client_name}/pending-longest/"
     
     for _ in range(3):  # Retry tối đa 3 lần
         try:
@@ -44,6 +51,9 @@ def get_task():
                 response_data["downloaded_image_path"] = image_path
                 return response_data
             else:
+                if response.status_code == 404:
+                    logger.info("No tasks found, waiting for new tasks...")
+                    return None
                 logger.warning(f"Failed to get task ({response.status_code}): {response.text}")
         except Exception as e:
             logger.error(f"Exception in get_task: {e}")
@@ -52,12 +62,13 @@ def get_task():
 
 def update_task(task: dict, image_paths: list = []):
     server_url = config_loader.get_config_value("app.server_url", "http://localhost:8000")
-    update_url = f"{server_url}/update_task"
+    client_name = config_loader.get_config_value('app.client_name', 'default_client_name')
+    update_url = f"{server_url}/{client_name}/update-task/"
 
     data = {
         "id": task.get("id"),
         "status": task.get("status"),
-        "updated_at": task.get("updated_at")
+        "message": task.get("message")
     }
 
     files = []
@@ -68,7 +79,7 @@ def update_task(task: dict, image_paths: list = []):
             logger.warning(f"File not found: {img_path}")
 
     try:
-        response = requests.post(update_url, data=data, files=files, timeout=15)
+        response = requests.patch(update_url, data=data, files=files, timeout=15)
         for _, file_tuple in files:
             file_tuple[1].close()
         if response.status_code == 200:
@@ -76,6 +87,7 @@ def update_task(task: dict, image_paths: list = []):
             return response.json()
         else:
             logger.error(f"Failed to update task {task.get('id')}: {response.status_code} {response.text}")
+            return None
     except Exception as e:
         logger.error(f"Exception in update_task: {e}")
     return None
@@ -101,17 +113,22 @@ def worker_loop():
                     final_images = [final_images]
                 task["status"] = "completed"
                 task["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+                task["message"] = "Completed"
                 logger.info(f"Task {task_id} completed successfully.")
             except Exception as e:
                 logger.error(f"Error processing {task_id}: {e}")
                 task["status"] = "failed"
+                task["message"] = str(e)
                 final_images = []
         else:
             logger.info(f"Task {task_id} has status {status}, skip processing.")
             final_images = []
         print(final_images)
-        update_task(task, final_images)
-        logger.info(f"Task {task_id} updated with status {task['status']}.")
+        check = update_task(task, final_images)
+        if check:
+            logger.info(f"Task {task_id} updated with status {task['status']}.")
+        else:
+            logger.error(f"Failed to update task {task_id}.")
         time.sleep(5)
 
 if __name__ == "__main__":

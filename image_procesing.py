@@ -40,7 +40,7 @@ def process_task(task: Base_task) -> list:
             logger.info(f"🔁 Attempt {attempt+1} to process task {task.id}")
             with PhotoshopAutomation(logger) as photoshop:
                 mockup_folder = ConfigLoader().get_config_value("app.mockup_folder", "")
-                mockup_folder = os.path.join(mockup_folder, f"{task.store_name}-{task.product_type}")
+                mockup_folder = os.path.join(mockup_folder, f"{task.store}-{task.product_type}")
                 current_path = os.path.dirname(os.path.abspath(__file__))
                 psd_file = [f for f in os.listdir(mockup_folder) if f.endswith(".psd")]
                 if not psd_file:
@@ -79,7 +79,7 @@ def process_task(task: Base_task) -> list:
         if not output_image.endswith(".webp"):
             webp_output = os.path.splitext(output_image)[0] + ".webp"
             logger.info(f"Converting {output_image} to {webp_output} and compressing...")
-            convert_to_webp_and_compress(output_image, webp_output)
+            convert_image_with_alpha(output_image, webp_output)
             output_images[i] = webp_output
         else:
             output_images[i] = output_image

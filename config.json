@@ -3,7 +3,7 @@
         "client_name": "dev-pc",
         "debug": false,
         "mockup_folder": "D:\\BulkDesign\\Bulk PSD Mockup",
-        "server_url": "http://localhost:8000",
+        "server_url": "https://bloom.minnyat.dev/api/v1/sple/client",
         "output_folder": "D:\\dev\\sple\\make-mockup-client\\statics\\output",
         "project_path": "D:\\dev\\sple\\make-mockup-client"
     },

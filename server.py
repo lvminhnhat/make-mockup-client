@@ -15,7 +15,7 @@ def get_product(client_name: str):
         "id": "1234",
         "product_name": "test",
         "product_type": "test",
-        "store_name": "test",
+        "store": "test",
         "status": "pending",
         "image_url": f"http://localhost:8000/images/image.png"
     }

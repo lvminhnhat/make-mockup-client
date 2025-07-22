@@ -11,8 +11,9 @@ class Base_task():
     product_type: str
     final_image: List [str] 
     status: str
-    store_name: str
+    store: str
     downloaded_image_path: str
+    message: str
     def to_dict(self) -> Dict[str, Any]:
         """Convert the task to a dictionary."""
         return {
@@ -21,8 +22,9 @@ class Base_task():
             "product_type": self.product_type,
             "final_image": self.final_image,
             "status": self.status,
-            "store_name": self.store_name,
-            "downloaded_image_path": self.downloaded_image_path
+            "store": self.store,
+            "downloaded_image_path": self.downloaded_image_path,
+            "message": self.message
         }
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Base_task':
@@ -33,8 +35,9 @@ class Base_task():
             product_type=data.get("product_type", ""),
             final_image=data.get("final_image", []),
             status=data.get("status", "pending"),
-            store_name=data.get("store_name", ""),
-            downloaded_image_path=data.get("downloaded_image_path", "")
+            store=data.get("store", ""),
+            downloaded_image_path=data.get("downloaded_image_path", ""),
+            message=data.get("message", "")
         )
 
 class TaskCreate(BaseModel):
